@@ -1,3 +1,6 @@
+# BSFishy - 5 years ago. Holden Ernest - 9/7/2025
+# Generates an interface for startup scripts on a server through Discord API integration
+
 # Import
 import discord
 from discord.ext import commands
@@ -9,6 +12,8 @@ import traceback
 import psutil
 import subprocess
 from shlex import quote, split
+
+#TODO: metadata should be parsed and used to directly change the server.properties file (for vanilla so you dont need to copy multiple building block files for every server)
 
 dir_path = path.dirname(path.realpath(__file__)) # Get the full path of the directory that this file is contained in
 
@@ -32,7 +37,11 @@ if not path.exists(server_dir) or not path.isdir(server_dir): # Check to make su
 token = config.get('DEFAULT', 'token') # Get the token
 
 prefix = config.get('DEFAULT', 'prefix', fallback='.')
-bot_role = config.get('DEfAULT', 'role', fallback='Minecraft OPS')
+bot_role = config.get('DEfAULT', 'role', fallback='Lupu')
+
+intents = discord.Intents.default()
+# Enable specific intents as needed
+intents.message_content = True
 
 print(f'Using {server_dir} as the server directory.') # Print a log message to inform about the current status
 server_threads = [] # A list of all of the thread of the running servers
@@ -102,12 +111,12 @@ help_command.dm_help = False # Never send help as a dm
 help_command.indent = 4 # Indentation of commands from heading
 help_command.size_offset = 2 # Add a padding offset to the commands
 
-client = commands.Bot(command_prefix = prefix, help_command=help_command, description='This is a bot to assist in starting Minecraft servers')
+client = commands.Bot(command_prefix = prefix, intents=intents, help_command=help_command, description='This is a bot to assist in starting Minecraft servers')
 
 @client.event
 async def on_ready():
     """Called when the bot is initialized."""
-    print('Autobots, Roll Out!') # Print a message to the console to aknkowledge the status
+    print('Bot is now online') # Print a message to the console to aknowledge the status
 
 # When the bot sees specific message (.help)
 @client.command(
@@ -158,10 +167,8 @@ def get_server_dirs():
         files = [f for f in os.listdir(dir) if path.isfile(path.join(dir, f))] # Get the files in the subdirectory
 
         start_file = None # The name of the start file. This is initially None to represent that there is no start file.
-        if 'start.bat' in files: # Check if start.bat is a file in the subdirectory
-            start_file = 'start.bat' # If so, set the start file to it
-        if 'run.bat' in files: # Check if run.bat is a file in the subdirectory
-            start_file = 'run.bat' # If so, set the start file to it
+        if 'start.sh' in files: # Check if start.bat is a file in the subdirectory
+            start_file = 'start.sh' # If so, set the start file to it
 
         if not start_file: # Check if there is still no start file in the subdirectory
             print(f'No start file in {dir}. Ignoring.') # If there is no start file, log a message to the console...
@@ -234,10 +241,8 @@ def start_server(name):
 
     server_files = [f for f in os.listdir(server_path) if path.isfile(path.join(server_path, f))] # Get a list of files in the server's directory
     start_file = None # The name of the start file. This is initially None to represent that there is no start file.
-    if 'start.bat' in server_files: # Check if start.bat is a file in the subdirectory
-        start_file = 'start.bat' # If so, set the start file to it
-    if 'run.bat' in server_files: # Check if run.bat is a file in the subdirectory
-        start_file = 'run.bat' # If so, set the start file to it
+    if 'start.sh' in server_files: # Check if start.bat is a file in the subdirectory
+        start_file = 'start.sh' # If so, set the start file to it
 
     if not start_file: # Check if there is still no start file in the subdirectory
         print(f'{server_path} did not contain a valid start file') # If there is no start file, log an error message to the console...
@@ -339,4 +344,5 @@ async def run(ctx, *input):
         else: # If the server started without throwing any sort of error
             await ctx.send(f'Server "{server}" started') # Send a log message to inform the user of the current status. TODO: potentially don't send this? (it could be confused with meaning the server is actually started.)
 
+print("STARTING BOT ----------------------------------------")
 client.run(token)
