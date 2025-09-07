@@ -1,3 +1,9 @@
+Forked from BSFishy/mc-server-bot
+
+
+---------------------------------
+
+
 # Discord Minecraft Server Bot
 A bot for Discord, which allows you to let members of your Discord server start Minecraft servers with a command.
 
